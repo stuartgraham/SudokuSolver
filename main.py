@@ -1,6 +1,7 @@
 
 import re
 from collections import Counter
+import numpy
 
 print('Enter known values row by row')
 print('Use # to denote missing squares')
@@ -69,7 +70,7 @@ def displaygrid(grid):
         print(rowcontent)
         rowcount += 1
 
-def gridshuffle(grid)
+def gridshuffle(grid):
     horzgrid = grid
     # creat vertgrid
     vertgrid = [] 
@@ -80,13 +81,34 @@ def gridshuffle(grid)
         vertgrid.append(gridcol)
     return horzgrid, vertgrid
 
-def solver(grid):
-    grids = gridshuffle(grid)
-    for gridrow in grids[0]:
+def hsolver(grid):
+    for gridrow in grid:
         for char in gridrow:
             if char == '#':
                 for i in range (1,9):
-                    checkcandiate viability
+                    continue
+                    #checkcandiate viability
+    return grid
+
+def vsolver(grid):
+    return grid
+
+def solver(grid):
+    #try Horziontal solver
+    workinggrid = hsolver(grid)
+
+    #get vertical grid
+    workinggrids = gridshuffle(workinggrid)
+    
+    #try Vertical solver
+    workinggrid = vsolver(workinggrids[1])
+    workinggrids = gridshuffle(workinggrid)
+    workinggrid = workinggrids[1]
+    
+
+    return workinggrid
+    
+   
 
 
 #inputarray = get_grid()
@@ -97,6 +119,10 @@ inputarray = ['#7##8####', '##59###31', '##1###2##', '#4#2##85#', '###4#7###', '
 gridattempt = validategrid(inputarray)
 print('Validated Grid : ' + str(gridattempt))
 
-displaygrid(inputarray)
-
-solver(inputarray)
+solveattempt = 0
+while solveattempt < 10:
+    solvedgrid = solver(inputarray)
+    print('#'*40)
+    print('#'*40)
+    displaygrid(solvedgrid)
+    solveattempt += 1

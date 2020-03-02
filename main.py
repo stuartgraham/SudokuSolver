@@ -1,128 +1,86 @@
+from pprint import pprint as pprint
 
-import re
-from collections import Counter
-import numpy
+def solver(inputgrid, answergrid):
+    rowcount = 0
+    for row in inputgrid:
+        colcount = 0
+        for col in row:
+            # Only deal with blanks (0's)
+            if col == 0:
+                # First solver - get rid of answers in the row
+                pass
+            else:
+                # Clear answer array if answer there
+                print(str(rowcount) + ',' + str(colcount))
+                answergrid[rowcount][colcount] = []
 
-print('Enter known values row by row')
-print('Use # to denote missing squares')
-print('e.g. 1#24#59##')
+            print('######')
+            print('Cell value')
+            print(str(col))
+            print('Answer grid')
+            print(str(rowcount) + ',' + str(colcount))
+            print(answergrid[rowcount][colcount])
+            print('######')
+            
+            colcount +=1
+        rowcount +=1 
 
-def get_grid():
-    inputrow = 0
-    inputarray = []
-    while inputrow < 9:
-        inputline = ''
-        inputline = input('Row : ')
-        inputarray.append(inputline)
-        inputrow += 1
-    return inputarray
 
-def validategrid(grid):
-    # check 9 elements
-    if len(grid) != 9:
-        return False
-    
-    # check gridrow is 9 long
-    for gridrow in grid:
-        if len(gridrow) != 9:
-            return False
+    return inputgrid, answergrid
 
-    # check gridrow is # or 1-9
-    for gridrow in grid:
-        validrow = bool(re.match('^[#1-9]+$', gridrow))
-        if not validrow:
-            return False
 
-    # check gridrow for duplicates
-    for gridrow in grid:
-        gridrow = gridrow.replace('#', '')
-        if not len(set(gridrow)) == len(gridrow):
-            return False
+inputgrid = [[0,7,0,0,8,0,0,0,0],
+              [0,0,5,9,0,0,0,3,1],
+              [0,0,1,0,0,0,2,0,0],
+              [0,4,0,2,0,0,8,5,0],
+              [0,0,0,4,0,7,0,0,0],
+              [0,1,7,0,0,8,0,2,0],
+              [0,0,9,0,0,0,6,0,0],
+              [1,6,0,0,0,3,5,0,0],
+              [0,0,0,0,7,0,0,8,0]]
 
-    # check vertical rows for duplicate
-    for i in range(9):
-        gridcol = ''
-        for gridrow in grid:
-            gridcol += gridrow[i]
-        gridcol = gridcol.replace('#', '')
-        if not len(set(gridcol)) == len(gridcol):
-            return False
-    
-    #grid valid
-    return True
+# Initialise answergrid
+def init_answergrid(inputgrid):
+    answergrid = []
+    for row in inputgrid:
+        answerrow = []
+        for col in row:
+            possibleanswer = [1,2,3,4,5,6,7,8,9]
+            if col in possibleanswer:
+                possibleanswer.remove(col)
+            answerrow.append(possibleanswer)
+        answergrid.append(answerrow) 
+    return answergrid
 
 def displaygrid(grid):
     rowcount = 0
-    for gridrow in grid:
-        charcount = 0
-        rowcontent = ''
+    for row in grid:
         if rowcount == 3 or rowcount == 6:
             print('━'*40)
-        for char in gridrow:
-            if charcount == 2 or charcount == 5:
-                rowcontent += (char + ' ┃┃ ')
-                #rowcontent += ( ' | ' + char + ' ┃ ')
-            elif charcount == 0:
-                rowcontent += (' | '  + char + ' | ')
+        colcount = 0
+        rowcontent = ''
+        for col in row:
+            if colcount == 2 or colcount == 5:
+                rowcontent += (str(col) + ' ┃┃ ')
+            elif colcount == 0:
+                rowcontent += (' | '  + str(col) + ' | ')
             else:
-                rowcontent += (char + ' | ')
-            charcount += 1
+                rowcontent += (str(col) + ' | ')
+            colcount += 1
         print(rowcontent)
         rowcount += 1
 
-def gridshuffle(grid):
-    horzgrid = grid
-    # creat vertgrid
-    vertgrid = [] 
-    for i in range(9):
-        gridcol = ''
-        for gridrow in grid:
-            gridcol += gridrow[i]
-        vertgrid.append(gridcol)
-    return horzgrid, vertgrid
-
-def hsolver(grid):
-    for gridrow in grid:
-        for char in gridrow:
-            if char == '#':
-                for i in range (1,9):
-                    continue
-                    #checkcandiate viability
-    return grid
-
-def vsolver(grid):
-    return grid
-
-def solver(grid):
-    #try Horziontal solver
-    workinggrid = hsolver(grid)
-
-    #get vertical grid
-    workinggrids = gridshuffle(workinggrid)
-    
-    #try Vertical solver
-    workinggrid = vsolver(workinggrids[1])
-    workinggrids = gridshuffle(workinggrid)
-    workinggrid = workinggrids[1]
-    
-
-    return workinggrid
-    
-   
-
-
-#inputarray = get_grid()
-
-#inputarray = ['#7##8####', '##59###31', '##1###2##', '#4#2##85#', '###4#7###', '#17##8#2#', '##9###6##', '16###35##', '####7##8#']
-inputarray = ['#7##8####', '##59###31', '##1###2##', '#4#2##85#', '###4#7###', '#17##8#2#', '##9###6##', '16###35##', '####7##8#']
-
-gridattempt = validategrid(inputarray)
-print('Validated Grid : ' + str(gridattempt))
+answergrid = init_answergrid(inputgrid)
+#pprint(answergrid)
+displaygrid(inputgrid)
 
 solveattempt = 0
+solvedgrid = solver(inputgrid, answergrid)
 while solveattempt < 10:
-    solvedgrid = solver(inputarray)
+    solvedgrid = solver(solvedgrid[0], solvedgrid[1])
     print('#'*40)
     print('#'*40)
-    displaygrid(solvedgrid)
+    #pprint(solvedgrid[1])
+    print('#'*40)
+    displaygrid(solvedgrid[0])
     solveattempt += 1

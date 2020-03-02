@@ -9,18 +9,19 @@ def solver(inputgrid, answergrid):
             if col == 0:
                 # First solver - get rid of answers in the row
                 pass
+                for range (1,9):
+                    answergrid[rowcount][colcount]
+                    inputgrid[rowcount]
             else:
                 # Clear answer array if answer there
                 print(str(rowcount) + ',' + str(colcount))
                 answergrid[rowcount][colcount] = []
 
-            print('######')
-            print('Cell value')
-            print(str(col))
-            print('Answer grid')
-            print(str(rowcount) + ',' + str(colcount))
+            print('#'*20)
+            print('Cell value: ' + str(col))
+            print('Answer grid : ' + str(rowcount) + ',' + str(colcount))
             print(answergrid[rowcount][colcount])
-            print('######')
+
             
             colcount +=1
         rowcount +=1 

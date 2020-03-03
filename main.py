@@ -4,7 +4,7 @@ import re
 import testpuzzles
 
 # Test settings
-GAMELEVEL = 1
+GAMELEVEL = int(input('GAMELEVEL (1-3) : '))
 inputgrid = testpuzzles.getinputgrid(GAMELEVEL)
 
 print('Enter known values row by row')
@@ -219,12 +219,11 @@ while newanswers:
         solvedgrid.append(inputgrid)
         solvedgrid.append(answergrid)
     # Display grid
-    print('Answer attempt')
-    displaygrid(solvedgrid[0])
-    print('\n')
+    #print('Answer attempt')
+    #displaygrid(solvedgrid[0])
+    #print('\n')
     # Try Horizontal solve
     solvedgrid = solver(solvedgrid[0], solvedgrid[1], firstrun)
-
     continuecheck1 = solvedgrid[2]
     # Try Vertical solve
     rotatedgrid.append(gridrotator(solvedgrid[0]))
@@ -241,10 +240,25 @@ while newanswers:
     else:
         newanswers = False
 
+print('\n')
 print('Original puzzle')
 displaygrid(inputgrid)
 print('\n')
+print('Last Solve Attempt')
+displaygrid(solvedgrid[0])
+print('\n')
 
+puzzledsolved = False
+for row in solvedgrid[1]:
+    if not any(row):
+        puzzledsolved = True
+
+if puzzledsolved == True:
+    print('Puzzled Solved!!')
+else:
+    print('Puzzle Not Solved :-(')
+
+print('\n')
 print('Answer grid')
 for row in solvedgrid[1]:
     print(str(row))

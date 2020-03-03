@@ -4,27 +4,28 @@ import re
 import testpuzzles
 
 # Test settings
-GAMELEVEL = int(input('GAMELEVEL (1-3) : '))
-inputgrid = testpuzzles.getinputgrid(GAMELEVEL)
+testmode = False
 
-print('Enter known values row by row')
-print('Use # to denote missing squares')
-print('e.g. 1#24#59##')
+if testmode == True:
+    GAMELEVEL = int(input('GAMELEVEL (1-3) : '))
+    inputgrid = testpuzzles.getinputgrid(GAMELEVEL)
 
 def getgrid():
+    print('Enter known values row by row')
+    print('Use # to denote missing squares')
+    print('e.g. 1#24#59##')
     rowcount = 0
     rowarray = []
     inputarray = []
     while rowcount < 9:
         inputline = ''
-        inputline = input('Row : ')
-        inputline.replace('#',0)
-        inputline.split('', inputline)
+        inputline = input('Row (' + str(rowcount+1) +'): ')
         inputarray.append(inputline)
-        inputrow += 1
+        rowcount += 1
+    print(inputarray)
     return inputarray
 
-def validategrid(grid):
+def validategrid(grid):    
     # check 9 elements
     if len(grid) != 9:
         return False
@@ -36,7 +37,7 @@ def validategrid(grid):
 
     # check gridrow is # or 1-9
     for gridrow in grid:
-        validrow = bool(re.match('^[0-9]+$', gridrow))
+        validrow = bool(re.match('^[#0-9]+$', gridrow))
         if not validrow:
             return False
 
@@ -57,6 +58,14 @@ def validategrid(grid):
     
     #grid valid
     return True
+
+def tidygrid(inputgrid):
+    newgrid =[]
+    for row in inputgrid:
+        inputline = row.replace('#',str(0))
+        rowarray = [int(i) for i in inputline]
+        newgrid.append(rowarray)
+    return newgrid
 
 
 def solver(inputgrid, answergrid, firstrun=False, rotation='h'):
@@ -201,12 +210,20 @@ def displaygrid(grid):
         print(rowcontent)
         rowcount += 1
 
-answergrid = init_answergrid(inputgrid)
-#gotvalidgrid = False
-#while not gotvalidgrid:
-#    inputgrid = getgrid()
-#    gotvalidgrid = validategrid(inputgrid)
 
+if testmode == False:
+    gotvalidgrid = False
+    while not gotvalidgrid:
+        inputgrid = getgrid()
+        gotvalidgrid = validategrid(inputgrid)
+        if gotvalidgrid == True:
+            inputgrid = tidygrid(inputgrid)
+        else:
+            print('#'*20)
+            print('Invalid board, try again')
+            print('#'*20)
+
+answergrid = init_answergrid(inputgrid)
 solveattempt = 0
 solveruns = 50
 newanswers = True
@@ -218,10 +235,7 @@ while newanswers:
         solvedgrid = []
         solvedgrid.append(inputgrid)
         solvedgrid.append(answergrid)
-    # Display grid
-    #print('Answer attempt')
-    #displaygrid(solvedgrid[0])
-    #print('\n')
+
     # Try Horizontal solve
     solvedgrid = solver(solvedgrid[0], solvedgrid[1], firstrun)
     continuecheck1 = solvedgrid[2]

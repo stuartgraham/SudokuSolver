@@ -4,7 +4,7 @@ import re
 import testpuzzles
 
 # Test settings
-GAMELEVEL = 3
+GAMELEVEL = 1
 inputgrid = testpuzzles.getinputgrid(GAMELEVEL)
 
 print('Enter known values row by row')
@@ -120,14 +120,25 @@ def solver(inputgrid, answergrid, firstrun=False, rotation='h'):
     minisquarededupes = ["0,0","0,3","0,6","3,0","3,3","3,6","6,0","6,3","6,6"]
     for minisquarededupe in minisquarededupes:
         minisquare = minisquared(minisquarededupe)
-        #temprowcount = [item for items in minisquare for item in items]
         temprowcount =[]
         for coord in minisquare:
             coord = coord.split(',')
             rowcoord, colcoord = int(coord[0]), int(coord[1])
             temprowcount.append(answergrid[rowcoord][colcoord])
         temprowcount = [item for items in temprowcount for item in items]
-        #print(temprowcount)
+    
+        for coord in minisquare:
+            answerindex = minisquare.index(coord)
+            coord = coord.split(',')
+            rowcoord, colcoord = int(coord[0]), int(coord[1])
+            answers = answergrid[rowcoord][colcoord]
+            for answer in answers:
+                answercount = temprowcount.count(answer)
+                if answercount == 1:
+                    answergrid[rowcoord][colcoord] = [answer]
+                    newanswers = True
+                    time.sleep(0)
+                    break
 
     return inputgrid, answergrid, newanswers
 

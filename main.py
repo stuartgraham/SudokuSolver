@@ -1,22 +1,26 @@
-from pprint import pprint as pprint
+
 import time
 import re
-from collections import Counter
+import testpuzzles
+
+# Test settings
+GAMELEVEL = 3
+inputgrid = testpuzzles.getinputgrid(GAMELEVEL)
 
 print('Enter known values row by row')
 print('Use # to denote missing squares')
 print('e.g. 1#24#59##')
 
-def get_grid():
+def getgrid():
     rowcount = 0
     rowarray = []
     inputarray = []
     while rowcount < 9:
         inputline = ''
         inputline = input('Row : ')
-        
+        inputline.replace('#',0)
+        inputline.split('', inputline)
         inputarray.append(inputline)
-
         inputrow += 1
     return inputarray
 
@@ -32,7 +36,7 @@ def validategrid(grid):
 
     # check gridrow is # or 1-9
     for gridrow in grid:
-        validrow = bool(re.match('^[#1-9]+$', gridrow))
+        validrow = bool(re.match('^[0-9]+$', gridrow))
         if not validrow:
             return False
 
@@ -55,14 +59,15 @@ def validategrid(grid):
     return True
 
 
-def solver(inputgrid, answergrid, firstrun=False):
+def solver(inputgrid, answergrid, firstrun=False, rotation='h'):
     rowcount = 0
+    newanswers = False
     for row in inputgrid:
         colcount = 0
         for col in row:
             # Only deal with blanks (0's)
             if col == 0:
-                # First solver - get rid of answers in the row
+                # First solver - get rid of answers already sitting in the row
                 for i in range(1,10):
                     if i in inputgrid[rowcount]:
                         try:
@@ -70,7 +75,7 @@ def solver(inputgrid, answergrid, firstrun=False):
                         except:
                             continue
 
-                # Dedupe answer grid based on mini grid             
+                # Second resolver - get rid of answers already sitting in the mini square            
                 minisquare = minisquared(str(rowcount) + ',' + str(colcount))
                 for coord in minisquare:
                     coord = coord.split(',')
@@ -80,40 +85,51 @@ def solver(inputgrid, answergrid, firstrun=False):
                             answergrid[rowcount][colcount].remove(inputgrid[rowcoord][colcoord])
                         except:
                             continue
-                
-                # Dedupe answer grid, if unique answer
-                if not firstrun:
-                    temprowcount = [item for items in answergrid[rowcount] for item in items]
-                    for answers in answergrid[rowcount]:
-                        answerindex = answergrid[rowcount].index(answers)
-                        for answer in answers:
-                            answercount = temprowcount.count(answer)
-                            if answercount == 1:
-                                print('Found a unique answer : ' + str(answer) + ' at answer index ' + str(answerindex))
-                                print(answergrid[rowcount])
-                                time.sleep(0.5)
                             
-
             else:
                 # Clear answer array if answer there
                 answergrid[rowcount][colcount] = []
 
-            #print('#'*20)
-            #print('Cell value: ' + str(col))
-            #print('Answer grid : ' + str(rowcount) + ',' + str(colcount))
-            #print(answergrid[rowcount][colcount])
-            
-            # Change value if answers down to 1 possible
             if len(answergrid[rowcount][colcount]) == 1:
-                print ('#'*40)
-                print ('!! Changing : Co-ord ' + str(rowcount) + ',' + str(colcount) + ' to ' + str(answergrid[rowcount][colcount][0]) + ' !!' )
-                print ('#'*40)
+                print ('#'*32)
+                if rotation == 'h':
+                    print ('!! Changing : Co-ord ' + str(rowcount+1) + ',' + str(colcount+1) + ' to ' + str(answergrid[rowcount][colcount][0]) + ' !!' )
+                if rotation == 'v':
+                    print ('!! Changing : Co-ord ' + str(colcount+1) + ',' + str(rowcount+1) + ' to ' + str(answergrid[rowcount][colcount][0]) + ' !!' )
+                print ('#'*32)
+                newanswers = True
                 inputgrid[rowcount][colcount] = answergrid[rowcount][colcount][0]
-                time.sleep(1)
+                time.sleep(0)
                 
             colcount +=1
+                            
+        # Third resolver - if unique answer in the answergrid be deterministic this is the answer
+        if not firstrun:
+            temprowcount = [item for items in answergrid[rowcount] for item in items]
+            for answers in answergrid[rowcount]:
+                answerindex = answergrid[rowcount].index(answers)
+                for answer in answers:
+                    answercount = temprowcount.count(answer)
+                    if answercount == 1:
+                        answergrid[rowcount][answerindex] = [answer]
+                        time.sleep(0)
+                        break
         rowcount +=1 
-    return inputgrid, answergrid
+
+    # Forth resolver -  if unique answer in the minisquare be deterministic this is the answer          
+    minisquarededupes = ["0,0","0,3","0,6","3,0","3,3","3,6","6,0","6,3","6,6"]
+    for minisquarededupe in minisquarededupes:
+        minisquare = minisquared(minisquarededupe)
+        #temprowcount = [item for items in minisquare for item in items]
+        temprowcount =[]
+        for coord in minisquare:
+            coord = coord.split(',')
+            rowcoord, colcoord = int(coord[0]), int(coord[1])
+            temprowcount.append(answergrid[rowcoord][colcoord])
+        temprowcount = [item for items in temprowcount for item in items]
+        #print(temprowcount)
+
+    return inputgrid, answergrid, newanswers
 
 def minisquared(inputstring):
     minisquare = [["0,0","0,1","0,2","1,0","1,1","1,2","2,0","2,1","2,2"],
@@ -132,7 +148,6 @@ def minisquared(inputstring):
             pass
     
     return minisquare[x[0]]
-     
 
 def gridrotator(inputgrid):
     tempinputgrid = []
@@ -143,31 +158,6 @@ def gridrotator(inputgrid):
         tempinputgrid.append(tempinputrow)
     grid = tempinputgrid
     return grid
-
-# Harder Game
-#inputgrid = [[0,7,0,0,8,0,0,0,0],
-#              [0,0,5,9,0,0,0,3,1],
-#              [0,0,1,0,0,0,2,0,0],
-#              [0,4,0,2,0,0,8,5,0],
-#              [0,0,0,4,0,7,0,0,0],
-#              [0,1,7,0,0,8,0,2,0],
-#              [0,0,9,0,0,0,6,0,0],
-#              [1,6,0,0,0,3,5,0,0],
-#              [0,0,0,0,7,0,0,8,0]]
-
-# Easier Game
-inputgrid = [[0,4,0,0,0,6,0,0,0],
-              [1,0,0,0,0,0,0,9,0],
-              [0,7,8,9,0,5,0,0,1],
-              [0,0,0,0,0,0,0,6,9],
-              [0,0,2,3,0,1,5,0,0],
-              [5,3,0,0,0,0,0,0,0],
-              [7,0,0,8,0,2,6,4,0],
-              [0,1,0,0,0,0,0,0,5],
-              [0,0,0,6,0,0,0,1,0]]
-
-
-        
 
 # Initialise answergrid
 def init_answergrid(inputgrid):
@@ -201,27 +191,49 @@ def displaygrid(grid):
         rowcount += 1
 
 answergrid = init_answergrid(inputgrid)
-#pprint(answergrid)
-displaygrid(inputgrid)
+#gotvalidgrid = False
+#while not gotvalidgrid:
+#    inputgrid = getgrid()
+#    gotvalidgrid = validategrid(inputgrid)
 
 solveattempt = 0
-solvedgrid = solver(inputgrid, answergrid, True)
-while solveattempt < 50:
+solveruns = 50
+newanswers = True
+while newanswers:
     rotatedgrid = []
-    solvedgrid = solver(solvedgrid[0], solvedgrid[1])
+    firstrun = False
+    if solveattempt == 0:
+        firstrun = True
+        solvedgrid = []
+        solvedgrid.append(inputgrid)
+        solvedgrid.append(answergrid)
+    # Display grid
+    print('Answer attempt')
+    displaygrid(solvedgrid[0])
+    print('\n')
+    # Try Horizontal solve
+    solvedgrid = solver(solvedgrid[0], solvedgrid[1], firstrun)
+
+    continuecheck1 = solvedgrid[2]
+    # Try Vertical solve
     rotatedgrid.append(gridrotator(solvedgrid[0]))
     rotatedgrid.append(gridrotator(solvedgrid[1]))
-    solvedgrid = solver(rotatedgrid[0], rotatedgrid[1], True)
+    solvedgrid = solver(rotatedgrid[0], rotatedgrid[1], firstrun, 'v')
+    continuecheck2 = solvedgrid[2]
+    # Rotate back to Horizontal
     rotatedgrid[0] = gridrotator(solvedgrid[0])
     rotatedgrid[1] = gridrotator(solvedgrid[1])
     solvedgrid = rotatedgrid[0],rotatedgrid[1]
-    #print('#'*40)
-    #print('#'*40)
-    #pprint(solvedgrid[1])
-    print('')
-    print('')
-    displaygrid(solvedgrid[0])
     solveattempt += 1
+    if continuecheck1 == True or continuecheck2 == True:
+        newanswers = True
+    else:
+        newanswers = False
 
+print('Original puzzle')
+displaygrid(inputgrid)
+print('\n')
+
+print('Answer grid')
 for row in solvedgrid[1]:
     print(str(row))
